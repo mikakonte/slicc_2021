@@ -3,6 +3,8 @@ slicc_tools.py
 Last updated: 21 June 2021
 '''
 import numpy as np
+from matplotlib import pyplot as plt
+
 
 def runge_kutta(x_i, func, dt = 0.1):
     '''
@@ -24,6 +26,7 @@ def runge_kutta(x_i, func, dt = 0.1):
     #Return the final condition in vector form
     return x_f
 
+
 def get_real_grid(x_min, x_max, num):
     '''
     Returns a square xy grid grid in a given interval with arguments:
@@ -37,22 +40,24 @@ def get_real_grid(x_min, x_max, num):
     
     return [[a, b] for a in x for b in y]
 
-def plot_direction_field(x_min, x_max, num, func):
+
+def plot_direction_field(func, x_min, x_max, num, d1 = 12, d2 = 10):
     '''
-    Plot the direction field of a given function with arguments:
+    Plots the direction field of a given function with arguments:
+    func = governing equation which should return a 2D vector with x_deriv, y_deriv
     x_min, x_max = the graphing boundaries along one axis
     num = number of grid points along one axis, i.e. total number of points = num * num
-    func = governing equation which should return a 2D vector with x_deriv, y_deriv
+    d1, d2 = dimensions of the pyplot figure, defaults to 12x10
     '''
     
     #Format figure for plotting
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(d1, d2))
 
     plt.xlabel(r'$x$')
     plt.ylabel(r'$y$')
 
-    plt.xticks(range(-x_min, x_max+1), range(-x_min, x_max+1))
-    plt.yticks(range(-x_min, x_max+1), range(-x_min, x_max+1))
+    plt.xticks(range(x_min, x_max+1), range(x_min, x_max+1))
+    plt.yticks(range(x_min, x_max+1), range(x_min, x_max+1))
 
     plt.axhline(y=0, color='k', linewidth=1)
     plt.axvline(x=0, color='k', linewidth=1)
@@ -65,14 +70,15 @@ def plot_direction_field(x_min, x_max, num, func):
     
     return
 
-def plot_trajectory(x_0, t, dt = 0.1, c = 'r', func):
+
+def plot_trajectory(func, x_0, t, dt = 0.1, c = 'r'):
     '''
-    Plot a single trajectory of a system from a given initial condition with arguments:
+    Plots a single trajectory of a system from a given initial condition with arguments:
+    func = governing equation which should return a 2D vector with x_deriv, y_deriv
     x_0 = initial condition in 2D vector form
     t = number of steps to graph
     dt = time step / step size, defaults to 0.1
     c = colour of the graph, defaults to red
-    func = governing equation which should return a 2D vector with x_deriv, y_deriv
     '''
     
     #Use plot instead of scatter for increased efficiency
@@ -83,3 +89,78 @@ def plot_trajectory(x_0, t, dt = 0.1, c = 'r', func):
         x_0 = runge_kutta(x_0, func, dt)
     
     return
+
+
+def lorenz(v, r, sigma, b):
+    '''
+    The governing equations of the Lorenz system for further use
+    '''
+    x, y, z = v[0], v[1], v[2]
+    
+    x_deriv = sigma * (y - x)
+    y_deriv = r*x - y - x*z
+    z_deriv = x*y - b*z
+    
+    return np.array([x_deriv, y_deriv, z_deriv])
+
+
+def lorenz_values(r, sigma, b, t, time_step = 0.01, transient = 0, v_0 = [0, 1, 0]):
+    '''
+    Returns lists of the (x, y, z) and t values of the Lorenz system with the given arguments:
+    r = the Rayleigh number
+    sigma = the Prandtl number
+    b = the value of parameter b
+    t = length of time over which the system is iterated
+    time_step = length of a single time step used for iteration; defaults to 0.01
+    transient = duration deleted from the beginning of the lists to remove a transient
+    v_0 = initial condition in (x, y, z) format; defaults to (0, 1, 0)
+    '''
+    
+    #Create lists of the (x, y, z) and time values
+    dim_values = [[], [], []]
+    t_values = []
+    
+    #Define the Lorenz equations with fixed parameters
+    def lorenz_var(v):
+        return lorenz(v, r = r, sigma = sigma, b = b)
+    
+    #Declare initial condition
+    v = v_0
+    
+    #Iterate over time steps
+    for step in np.arange(0, t, time_step):
+        t_values.append(step)
+        
+        #Add new values of (x, y, z) to the list dim_values
+        for m in range(3):
+            dim_values[m].append(v[m])
+     
+        #Retrieve the next coordinates using fourth-order Runge-Kutta
+        v = runge_kutta(v, lorenz_var, dt = time_step)
+    
+    return dim_values, t_values
+
+
+def logistic_map(S, N, r_lim = [1, 4]):
+    '''
+    Returns two lists (r, x) of the logistic map with the arguments:
+    S = the number of r values used for plotting
+    N = the number of iterations per value of r
+    '''
+    
+    #Create list of r values in the r_lim range; defaults to [0, 4]
+    r_values = np.linspace(r_lim[0], r_lim[1], S)
+    
+    #Declare empty list of x values
+    x_values = []
+    
+    #Iterate system N times for each value of r
+    for r in r_values:
+        i = 0
+        x = np.random.uniform(0, 1)
+        while i < N:
+            x = r * x * (1 - x)
+            i += 1
+        x_values.append(x)
+    
+    return r_values, x_values
