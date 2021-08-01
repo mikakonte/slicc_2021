@@ -141,11 +141,29 @@ def lorenz_values(r, sigma, b, t, time_step = 0.01, transient = 0, v_0 = [0, 1, 
     return dim_values, t_values
 
 
-def logistic_map(S, N, r_lim = [1, 4]):
+def logistic(r, x_input = np.linspace(0, 1, 100)):
+    '''
+    Returns a list of the x_n values after one iteration of the logistic equation with the arguments:
+    r = the chosen value of parameter r
+    x_input = list of x values to use as initial conditions; defaults to 100 evenly spaced values in the interval [0, 1]
+    '''
+    
+    #Create an empty list to hold x_n values
+    x_n = []
+    
+    #Iterate over the given x_input list
+    for x in x_input:
+        x_n.append(r * x * (1 - x))
+             
+    return x_n
+        
+
+def logistic_map(S, N, r_lim = [1, 4], x_input = np.random.uniform(0, 1)):
     '''
     Returns two lists (r, x) of the logistic map with the arguments:
     S = the number of r values used for plotting
     N = the number of iterations per value of r
+    x_input = the initial value of x; defaults to a random value between 0 and 1
     '''
     
     #Create list of r values in the r_lim range; defaults to [0, 4]
@@ -157,7 +175,9 @@ def logistic_map(S, N, r_lim = [1, 4]):
     #Iterate system N times for each value of r
     for r in r_values:
         i = 0
-        x = np.random.uniform(0, 1)
+        
+        #Choose randomised x value as the initial condition
+        x = x_input
         while i < N:
             x = r * x * (1 - x)
             i += 1
