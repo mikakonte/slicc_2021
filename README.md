@@ -4,4 +4,4 @@ Study material and programming exercises for Summer 2021 SLICC (Student-Led, Ind
 
 Note that some of the Markdown-formatted text in the Jupyter Notebooks may not render properly on GitHub.
 
-![alt text](https://github.com/mikakonte/slicc_2021/blob/main/graphs/sync_x.png?raw=true)
+![Sync](https://github.com/mikakonte/slicc_2021/blob/main/graphs/sync_x.png?raw=true)
